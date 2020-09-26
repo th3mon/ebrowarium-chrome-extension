@@ -14,11 +14,44 @@ chrome.runtime.onInstalled.addListener(function () {
       {
         conditions: [
           new chrome.declarativeContent.PageStateMatcher({
-            pageUrl: { hostEquals: 'developer.chrome.com' },
+            pageUrl: { hostEquals: 'ebrowarium.pl' },
           }),
         ],
         actions: [new chrome.declarativeContent.ShowPageAction()],
       },
     ]);
   });
+});
+
+window.addEventListener('message', event => {
+  console.log({ event });
+});
+chrome.runtime.onMessage.addListener(event => {
+  console.log({ event });
+});
+
+const ports = {};
+
+chrome.runtime.onConnect.addListener(function (port) {
+  if (!ports[port.name]) {
+    ports[port.name] = port;
+
+    console.log(`port ${port.name} is connected`)
+  }
+  
+  if(port && port.name === 'beer-popup') {
+    console.log('beer-popup');
+  }
+  
+  port.onMessage.addListener(function (message) {
+    if (message === 'GIVE_ME_BEERS_COUNT') {
+      // console.log(message)
+      ports.content.postMessage(message)
+      // ports.popup.postMessage(message)
+    } else {
+      console.log(message)
+    }
+  });
+
+  // console.log(ports)
 });
